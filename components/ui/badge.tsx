@@ -2,27 +2,29 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 type BadgeProps = React.HTMLAttributes<HTMLSpanElement> & {
-  variant?: "success" | "warning" | "error" | "info" | "neutral";
+  variant?: "success" | "warning" | "error" | "info" | "neutral" | "primary";
 };
 
 const variants = {
   success:
-    "bg-emerald-100/80 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20",
+    "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300",
   warning:
-    "bg-amber-100/80 text-amber-800 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20",
+    "bg-amber-500/10 text-amber-700 ring-amber-500/20 dark:text-amber-300",
   error:
-    "bg-red-100/80 text-red-800 ring-red-600/20 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-400/20",
+    "bg-red-500/10 text-red-700 ring-red-500/20 dark:text-red-300",
   info:
-    "bg-blue-100/80 text-blue-800 ring-blue-600/20 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/20",
+    "bg-sky-500/10 text-sky-700 ring-sky-500/20 dark:text-sky-300",
   neutral:
-    "bg-slate-100 text-slate-700 ring-slate-300/40 dark:bg-white/[0.06] dark:text-slate-300 dark:ring-white/10",
+    "bg-muted text-muted-foreground ring-border dark:bg-white/[0.06] dark:text-slate-300 dark:ring-white/10",
+  primary:
+    "bg-primary/10 text-primary ring-primary/20 dark:text-emerald-300",
 };
 
 export function Badge({ className, variant = "neutral", ...props }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ring-1 ring-inset",
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ring-1 ring-inset",
         variants[variant],
         className,
       )}

@@ -13,20 +13,36 @@ import {
   Settings,
   Users,
   Workflow,
-  ChevronRight,
   Shield,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/leads", label: "Leads", icon: Users },
-  { href: "/mensagens", label: "FAQ", icon: MessageSquareText },
-  { href: "/atendimento", label: "Atendimento", icon: Headphones },
-  { href: "/fluxos", label: "Fluxos de Venda", icon: Workflow },
-  { href: "/agendamento", label: "Agendamento", icon: CalendarDays },
-  { href: "/produtos", label: "Catálogo", icon: Package },
-  { href: "/configuracoes", label: "Configurações", icon: Settings },
+const navGroups = [
+  {
+    label: "Geral",
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/leads", label: "Leads", icon: Users },
+      { href: "/atendimento", label: "Atendimento", icon: Headphones },
+    ],
+  },
+  {
+    label: "Automação",
+    items: [
+      { href: "/fluxos", label: "Fluxos de Venda", icon: Workflow },
+      { href: "/mensagens", label: "FAQ & Respostas", icon: MessageSquareText },
+      { href: "/agendamento", label: "Agendamento", icon: CalendarDays },
+    ],
+  },
+  {
+    label: "Negócio",
+    items: [
+      { href: "/produtos", label: "Catálogo", icon: Package },
+      { href: "/configuracoes", label: "Configurações", icon: Settings },
+    ],
+  },
 ];
 
 export type SidebarProps = {
@@ -40,136 +56,133 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
   const pathname = usePathname();
 
   return (
-    <aside className="hidden h-screen w-72 shrink-0 border-r border-border/50 bg-card/60 glass lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex lg:flex-col dark:border-white/[0.06] dark:bg-slate-950/60">
-      {/* Logo */}
-      <div className="flex h-20 items-center gap-4 border-b border-border/50 px-6 dark:border-white/[0.06]">
-        {/* Avatar da empresa — logo customizada ou ícone padrão */}
+    <aside className="hidden h-screen w-[264px] shrink-0 flex-col border-r border-border bg-card/70 backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex dark:bg-[hsl(222_24%_6%/0.85)]">
+      {/* Brand */}
+      <div className="flex h-[68px] items-center gap-3 border-b border-border px-5">
         {logoUrl ? (
-          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/10 dark:ring-white/10">
-            <Image
-              src={logoUrl}
-              alt={`Logo ${companyName}`}
-              fill
-              className="object-cover"
-              sizes="48px"
-              unoptimized
-            />
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
+            <Image src={logoUrl} alt={`Logo ${companyName}`} fill className="object-cover" sizes="40px" unoptimized />
           </div>
         ) : (
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-lg shadow-emerald-500/20"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, rgb(74 222 128) 0%, rgb(20 184 166) 52%, rgb(6 182 212) 100%)",
-            }}
-          >
-            <Bot className="h-6 w-6" aria-hidden="true" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_4px_16px_hsl(158_82%_45%/0.35)]">
+            <Bot className="h-5 w-5" aria-hidden="true" />
           </div>
         )}
-        <div>
-          <p className="text-base font-bold tracking-tight text-foreground">
-            {companyName}
-          </p>
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-600 dark:text-emerald-400">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold tracking-tight text-foreground">{companyName}</p>
+          <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-glow-pulse" />
             CPSFLOW
           </p>
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="mb-4 px-2 text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-          Menu Principal
-        </div>
-        <nav className="flex flex-col gap-1.5">
-          {navItems.map((item) => {
-            const active = pathname === item.href;
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "group flex h-12 items-center justify-between rounded-2xl px-3 transition-all duration-200",
-                  active
-                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/20"
-                    : "border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+        {navGroups.map((group) => (
+          <div key={group.label}>
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+              {group.label}
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {group.items.map((item) => {
+                const active = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
                     className={cn(
-                      "h-5 w-5 transition-colors",
-                      active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground group-hover:text-foreground",
+                      "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-200",
+                      active
+                        ? "bg-primary/10 text-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
-                    aria-hidden="true"
-                  />
-                  <span className="text-sm font-semibold">{item.label}</span>
-                </div>
-                {active && <ChevronRight className="h-4 w-4 text-emerald-500/60 dark:text-emerald-400/60" />}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Super admin link */}
-        {isSuperAdmin && (
-          <div className="mt-4">
-            <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-              Administração
+                  >
+                    {active && (
+                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+                    )}
+                    <Icon
+                      className={cn(
+                        "h-[18px] w-[18px] shrink-0 transition-colors",
+                        active ? "text-primary" : "text-muted-foreground group-hover:text-foreground",
+                      )}
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
             </div>
+          </div>
+        ))}
+
+        {isSuperAdmin && (
+          <div>
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+              Administração
+            </p>
             <Link
               href="/admin/usuarios"
               className={cn(
-                "group flex h-12 items-center justify-between rounded-2xl px-3 transition-all duration-200",
+                "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-200",
                 pathname.startsWith("/admin")
-                  ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/20"
-                  : "border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+                  ? "bg-amber-500/10 text-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
               )}
             >
-              <div className="flex items-center gap-3">
-                <Shield
-                  className={cn(
-                    "h-5 w-5 transition-colors",
-                    pathname.startsWith("/admin") ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground group-hover:text-foreground",
-                  )}
-                  aria-hidden="true"
-                />
-                <span className="text-sm font-semibold">Gerenciar Usuários</span>
-              </div>
+              {pathname.startsWith("/admin") && (
+                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-amber-500" />
+              )}
+              <Shield
+                className={cn(
+                  "h-[18px] w-[18px] shrink-0",
+                  pathname.startsWith("/admin") ? "text-amber-500" : "text-muted-foreground group-hover:text-foreground",
+                )}
+                aria-hidden="true"
+              />
+              <span className="truncate">Gerenciar Usuários</span>
             </Link>
           </div>
         )}
+      </nav>
+
+      {/* Upgrade / status card */}
+      <div className="px-3 pb-2">
+        <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-primary/[0.06] p-3.5">
+          <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-primary/20 blur-2xl" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+            <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+            IA ativa
+          </div>
+          <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+            Respostas automáticas rodando 24/7 no seu WhatsApp.
+          </p>
+          <Link
+            href="/configuracoes"
+            className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+          >
+            Gerenciar IA
+            <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
 
       {/* User card */}
-      <div className="border-t border-border/50 p-4 dark:border-white/[0.06]">
-        <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-accent/50 p-3 transition-colors hover:bg-accent dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.06]">
+      <div className="border-t border-border p-3">
+        <div className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-accent">
           {logoUrl ? (
-            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-black/10 dark:ring-white/10">
-              <Image
-                src={logoUrl}
-                alt={companyName}
-                fill
-                className="object-cover"
-                sizes="36px"
-                unoptimized
-              />
+            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ring-1 ring-border">
+              <Image src={logoUrl} alt={companyName} fill className="object-cover" sizes="36px" unoptimized />
             </div>
           ) : (
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white shadow-inner"
-              style={{ backgroundImage: "linear-gradient(135deg, rgb(14 165 233) 0%, rgb(99 102 241) 100%)" }}
-            >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-xs font-bold text-foreground ring-1 ring-border">
               {companyInitials}
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-bold text-foreground">{companyName}</p>
-            <p className="truncate text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              {isSuperAdmin ? "Super Admin" : "Plano Pro"}
-            </p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-foreground">{companyName}</p>
+            <p className="truncate text-xs text-muted-foreground">{isSuperAdmin ? "Super Admin" : "Plano Pro"}</p>
           </div>
         </div>
       </div>
