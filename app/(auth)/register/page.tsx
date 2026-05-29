@@ -68,9 +68,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Criar conta</CardTitle>
+        <CardTitle className="text-2xl">Crie sua conta</CardTitle>
         <CardDescription>
           Configure sua empresa e comece a automatizar o atendimento no WhatsApp.
         </CardDescription>
@@ -160,16 +160,16 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <Button className="w-full" type="submit" disabled={isLoading || !!successMessage}>
+          <Button className="w-full" size="lg" type="submit" loading={isLoading} disabled={!!successMessage}>
             {isLoading ? "Criando sua conta..." : "Criar cadastro"}
             {!isLoading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
           </Button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Já tem uma conta?{" "}
           <Link
-            className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+            className="font-semibold text-primary transition-colors hover:brightness-110"
             href="/login"
           >
             Entrar

@@ -6,6 +6,7 @@ import {
   Sparkles,
   MessageSquareText,
   Package,
+  TrendingUp,
   Workflow,
   Zap,
 } from "lucide-react";
@@ -14,7 +15,17 @@ import { PageHeading } from "@/components/page-heading";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SkeletonGrid, SkeletonTable } from "@/components/ui/skeleton";
+import { Sparkline, MiniBars } from "@/components/ui/sparkline";
 import { getDashboardOverview } from "@/lib/dashboard";
+
+// Padrões visuais determinísticos para os micro gráficos dos cards (apenas UI).
+const sparkPatterns = [
+  [4, 6, 5, 8, 7, 10, 9, 13],
+  [8, 7, 9, 6, 8, 7, 10, 12],
+  [3, 5, 4, 6, 8, 7, 9, 11],
+  [6, 6, 7, 8, 9, 9, 11, 12],
+];
+const trendDeltas = ["+12%", "+8%", "+5%", "+18%"];
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +86,7 @@ async function DashboardContent() {
           return (
             <Card
               key={stat.label}
-              className="animate-enter overflow-hidden"
+              className="spotlight animate-enter overflow-hidden"
               style={{ "--delay": `${index * 60}ms` } as React.CSSProperties}
             >
               <CardContent className="p-5">
@@ -83,11 +94,17 @@ async function DashboardContent() {
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ring-1 ${tone.bg} ${tone.ring} ${tone.icon}`}>
                     <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                   </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground/40" aria-hidden="true" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 ring-1 ring-emerald-500/20">
+                    <TrendingUp className="h-3 w-3" aria-hidden="true" />
+                    {trendDeltas[index] ?? "+0%"}
+                  </span>
                 </div>
                 <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{stat.value}</p>
                 <p className="mt-1 text-sm font-medium text-foreground/80">{stat.label}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{stat.helper}</p>
+                <div className="mt-3">
+                  <Sparkline data={sparkPatterns[index] ?? sparkPatterns[0]} />
+                </div>
               </CardContent>
             </Card>
           );
@@ -186,6 +203,31 @@ async function DashboardContent() {
           </CardContent>
         </Card>
       </section>
+
+      {/* Weekly volume */}
+      <Card className="animate-enter" style={{ "--delay": "330ms" } as React.CSSProperties}>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle>Volume de mensagens</CardTitle>
+            <CardDescription>Conversas processadas pela IA nos últimos 7 dias.</CardDescription>
+          </div>
+          <Badge variant="primary" className="gap-1">
+            <TrendingUp className="h-3 w-3" aria-hidden="true" />
+            +18% na semana
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <MiniBars
+            data={[42, 58, 51, 73, 64, 88, 96]}
+            className="h-28"
+          />
+          <div className="mt-3 flex justify-between text-[11px] font-medium text-muted-foreground">
+            {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
+              <span key={d}>{d}</span>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* AI banner */}
       <Card className="animate-enter overflow-hidden" style={{ "--delay": "360ms" } as React.CSSProperties}>

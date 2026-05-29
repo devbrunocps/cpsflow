@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Menu, Search, X, Bot } from "lucide-react";
+import { Bell, Menu, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { BrandLockup } from "@/components/brand-mark";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -49,12 +50,7 @@ export function Header() {
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
             <div className="relative w-72 max-w-full border-r border-border bg-card p-5 shadow-2xl animate-slide-up">
               <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <Bot className="h-5 w-5" />
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">CPSFLOW</span>
-                </div>
+                <BrandLockup size={36} />
                 <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} aria-label="Fechar menu">
                   <X className="h-5 w-5 text-muted-foreground" />
                 </Button>
@@ -66,9 +62,9 @@ export function Header() {
                     href={href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                       pathname === href
-                        ? "bg-primary/10 text-foreground"
+                        ? "bg-primary/10 text-foreground ring-1 ring-primary/15"
                         : "text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
                   >

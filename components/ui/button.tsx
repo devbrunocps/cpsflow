@@ -1,14 +1,16 @@
 import * as React from "react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
   size?: "sm" | "md" | "lg" | "icon";
+  loading?: boolean;
 };
 
 const variants = {
   primary:
-    "bg-primary text-primary-foreground shadow-[0_1px_0_hsl(0_0%_100%/0.18)_inset,0_6px_20px_hsl(158_82%_45%/0.25)] hover:brightness-110 hover:-translate-y-px",
+    "bg-primary text-primary-foreground shadow-[0_1px_0_hsl(0_0%_100%/0.18)_inset,0_6px_20px_hsl(158_82%_45%/0.25)] hover:brightness-110 hover:-translate-y-px hover:shadow-[0_1px_0_hsl(0_0%_100%/0.22)_inset,0_10px_30px_hsl(158_82%_45%/0.35)]",
   secondary:
     "bg-secondary text-secondary-foreground border border-border hover:bg-accent",
   outline:
@@ -31,11 +33,15 @@ export function Button({
   variant = "primary",
   size = "md",
   type = "button",
+  loading = false,
+  disabled,
+  children,
   ...props
 }: ButtonProps) {
   return (
     <button
       type={type}
+      disabled={disabled || loading}
       className={cn(
         "inline-flex shrink-0 items-center justify-center rounded-xl font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97]",
         variants[variant],
@@ -43,6 +49,9 @@ export function Button({
         className,
       )}
       {...props}
-    />
+    >
+      {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+      {children}
+    </button>
   );
 }

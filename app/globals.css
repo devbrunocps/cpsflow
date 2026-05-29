@@ -301,3 +301,76 @@ body {
   animation: slide-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--delay, 0ms);
 }
+
+/* ─── PREMIUM SURFACE TREATMENTS ─── */
+
+/* Conic spotlight that follows the brand — for hero/auth panels */
+.bg-aurora {
+  background:
+    radial-gradient(60% 60% at 20% 10%, hsl(158 82% 45% / 0.18), transparent 60%),
+    radial-gradient(50% 50% at 90% 20%, hsl(199 89% 55% / 0.14), transparent 55%),
+    radial-gradient(70% 70% at 60% 100%, hsl(158 82% 40% / 0.1), transparent 60%);
+}
+
+/* Hairline gradient border (premium card edge) */
+.ring-hairline {
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.06),
+    inset 0 0 0 1px hsl(0 0% 100% / 0.04);
+}
+
+/* Spotlight that brightens on hover (interactive cards) */
+.spotlight {
+  position: relative;
+  overflow: hidden;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 0%),
+    hsl(158 82% 50% / 0.1),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Animated conic ring for "AI / live" indicators */
+.conic-ring {
+  background: conic-gradient(
+    from 0deg,
+    hsl(158 82% 48%),
+    hsl(199 89% 55%),
+    hsl(158 82% 48%)
+  );
+  animation: spin-slow 4s linear infinite;
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+/* Marquee for logo strips */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter,
+  .animate-marquee,
+  .conic-ring,
+  .animate-glow-pulse,
+  .animate-float {
+    animation: none !important;
+  }
+}

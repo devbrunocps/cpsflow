@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  Bot,
   CalendarDays,
   Headphones,
   LayoutDashboard,
@@ -17,6 +16,7 @@ import {
   Sparkles,
   ArrowUpRight,
 } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 import { cn } from "@/lib/utils";
 
 const navGroups = [
@@ -56,7 +56,7 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
   const pathname = usePathname();
 
   return (
-    <aside className="hidden h-screen w-[264px] shrink-0 flex-col border-r border-border bg-card/70 backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex dark:bg-[hsl(222_24%_6%/0.85)]">
+    <aside className="hidden h-screen w-[264px] shrink-0 flex-col border-r border-border bg-card/60 backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex dark:bg-[hsl(222_24%_5%/0.85)]">
       {/* Brand */}
       <div className="flex h-[68px] items-center gap-3 border-b border-border px-5">
         {logoUrl ? (
@@ -64,13 +64,11 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
             <Image src={logoUrl} alt={`Logo ${companyName}`} fill className="object-cover" sizes="40px" unoptimized />
           </div>
         ) : (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_4px_16px_hsl(158_82%_45%/0.35)]">
-            <Bot className="h-5 w-5" aria-hidden="true" />
-          </div>
+          <BrandMark size={40} />
         )}
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold tracking-tight text-foreground">{companyName}</p>
-          <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+          <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-glow-pulse" />
             CPSFLOW
           </p>
@@ -93,14 +91,14 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-200",
+                      "group relative flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-200",
                       active
-                        ? "bg-primary/10 text-foreground"
+                        ? "bg-primary/10 text-foreground ring-1 ring-primary/15"
                         : "text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
                   >
                     {active && (
-                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_12px_hsl(158_82%_45%/0.8)]" />
                     )}
                     <Icon
                       className={cn(
@@ -125,9 +123,9 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
             <Link
               href="/admin/usuarios"
               className={cn(
-                "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-200",
+                "group relative flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-200",
                 pathname.startsWith("/admin")
-                  ? "bg-amber-500/10 text-foreground"
+                  ? "bg-amber-500/10 text-foreground ring-1 ring-amber-500/15"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground",
               )}
             >
@@ -147,9 +145,9 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
         )}
       </nav>
 
-      {/* Upgrade / status card */}
+      {/* AI status card */}
       <div className="px-3 pb-2">
-        <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-primary/[0.06] p-3.5">
+        <div className="spotlight relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.06] p-3.5">
           <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-primary/20 blur-2xl" />
           <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -160,7 +158,7 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
           </p>
           <Link
             href="/configuracoes"
-            className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+            className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition-colors hover:brightness-110"
           >
             Gerenciar IA
             <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
