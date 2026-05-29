@@ -1,0 +1,1722 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-messages-check",
+              "leftValue": "={{ $json.messages_to_send.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "54d1cb3f-bf54-4258-afed-50e8904a3b8e",
+      "name": "Verificar Mensagens",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        17312,
+        18576
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n-cpsflow-8asgd8h38hr83",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "29403b23-dc7e-4943-bb78-dfe2fe04f485",
+      "name": "🔔 Webhook UAZAPI",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        11584,
+        17776
+      ],
+      "webhookId": "atendezap-whatsapp"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"status\": \"ok\" }",
+        "options": {}
+      },
+      "id": "51c90750-1229-4bab-ba83-23f9f1519bc0",
+      "name": "Resposta 1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        11824,
+        17632
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\n\n// 1. Verifica se o objeto de mensagem existe\nif (!body?.message) return [];\n\n// 2. Ignora se a mensagem foi enviada por você mesmo\n//if (body.message.fromMe === true) return [];\n\n// 3. Ignora mensagens de grupo\nif (body.message.isGroup === true) return [];\n\n// 4. Extrai o número de telefone (limpando sufixos e caracteres não numéricos)\nconst rawPhone = body.message.sender_pn || body.chat?.phone || '';\nconst phone = rawPhone.replace('@s.whatsapp.net', '').replace(/\\D/g, '');\n\n// 5. Extrai o texto da mensagem\nconst message = body.message.text || body.message.content || '';\n\n// 6. Extrai o nome do contato e o nome da instância\nconst name = body.message.senderName || body.chat?.wa_name || 'Desconhecido';\nconst instance = body.instanceName || '';\n\n// 7. Se não tiver telefone ou mensagem, encerra\nif (!phone || !message.trim()) return [];\n\nreturn [{ \n  json: { \n    phone, \n    message: message.trim(), \n    name, \n    instance \n  } \n}];"
+      },
+      "id": "22012f29-c8a3-43ee-8635-44e936f17e72",
+      "name": "Extrair Dados da Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11824,
+        17776
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/company_integrations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "uazapi_instance",
+              "value": "=eq.{{ $json.instance }}"
+            },
+            {
+              "name": "select",
+              "value": "company_id,webhook_secret,uazapi_base_url,uazapi_token,uazapi_instance"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "242c6a4e-9f73-4374-97b7-ad07868ca230",
+      "name": "Buscar Empresa por Instancia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12064,
+        17776
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const integrations = $input.first().json;\nconst extracted = $('Extrair Dados da Mensagem').first().json;\n\nconst i = integrations;\n\nreturn [{ json: { ...extracted, company_id: i.company_id, uazapi_base_url: i.uazapi_base_url, uazapi_token: i.uazapi_token, uazapi_instance: i.uazapi_instance, webhook_secret: i.webhook_secret } }];"
+      },
+      "id": "cae2ad8f-65ad-4832-b2de-ac2bdc58c91a",
+      "name": "Montar Contexto da Empresa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12304,
+        17776
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/company_settings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "company_id",
+              "value": "=eq.{{ $json.company_id }}"
+            },
+            {
+              "name": "select",
+              "value": "welcome_message,fallback_message,off_hours_message,opening_hours"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "60bb9b8a-8a9d-460b-86df-4c46a1c3d4cd",
+      "name": "Buscar Configuracoes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12544,
+        17664
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/companies",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "=eq.{{ $('Montar Contexto da Empresa').first().json.company_id }}"
+            },
+            {
+              "name": "select",
+              "value": "id,name,slug"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "adf7a864-cf1d-4683-ac6b-d9dd68fc003f",
+      "name": "Buscar Nome da Empresa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12544,
+        17872
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. RECUPERAÇÃO DE DADOS DOS NÓS ANTERIORES\n// Pega a saída (output) do nó de contexto da empresa\nconst ctx = $('Montar Contexto da Empresa').first().json;\n// Pega a saída do nó com as configurações (mensagens, horários, etc)\nconst settings = $('Buscar Configuracoes').first().json;\n// Pega a saída do nó com os dados básicos da empresa (nome, id, etc)\nconst company = $('Buscar Nome da Empresa').first().json;\n\n// 2. TRATAMENTO DOS DADOS (Evitando erros caso o banco de dados retorne Array ou Objeto direto)\n// Se 'settings' for uma lista, pega o primeiro item. Se não, usa ele mesmo (sd = settings data)\nconst sd = Array.isArray(settings) ? settings[0] : settings;\n// Mesma lógica para os dados da empresa (cd = company data)\nconst cd = Array.isArray(company) ? company[0] : company;\n\n// 3. PREPARAÇÃO DOS HORÁRIOS\n// Extrai o campo de horários. Se ele vier vazio/nulo, usa um objeto vazio {} para o código não quebrar\nconst openingHours = sd?.opening_hours || {};\n\n// 4. IDENTIFICAÇÃO DO MOMENTO ATUAL (Fuso Horário do Brasil)\n// Cria uma data com o horário exato de agora, forçando o fuso horário de São Paulo (evita bugs de servidor em outro país)\nconst now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));\n\n// Mapeia os dias da semana do JavaScript (que vão de 0 a 6) para os nomes em inglês que você usa no banco de dados\nconst dayMap = ['sun','mon','tue','wed','thu','fri','sat'];\n\n// Pega o número do dia de hoje (ex: 1 para segunda-feira) e busca o nome no mapa (ex: 'mon')\nconst dayKey = dayMap[now.getDay()];\n\n// Pega apenas a configuração de horário específica para o dia de hoje\nconst todayConfig = openingHours[dayKey];\n\n// 5. CÁLCULO SE ESTÁ DENTRO OU FORA DO HORÁRIO COMERCIAL\n// Começamos assumindo que estamos dentro do horário (true)\nlet inHours = true;\n\n// Se existir uma configuração para o dia de hoje no banco de dados, faz as validações:\nif (todayConfig) {\n  // Se o dia de hoje estiver marcado como inativo (ex: domingo fechado), define inHours como falso (fora do horário)\n  if (!todayConfig.active) { \n    inHours = false; \n  }\n  // Se estiver ativo, vamos calcular se a hora atual está entre a abertura e o fechamento\n  else {\n    // Pega a hora de abertura (ou '08:00' por padrão). Divide em 'oh' (hora) e 'om' (minuto) e converte para número\n    const [oh,om] = (todayConfig.open||'08:00').split(':').map(Number);\n    // Pega a hora de fechamento (ou '18:00' por padrão). Divide em 'ch' (hora) e 'cm' (minuto) e converte para número\n    const [ch,cm] = (todayConfig.close||'18:00').split(':').map(Number);\n    \n    // Converte a hora atual inteira para minutos (ex: 10:30 vira 10*60 + 30 = 630 minutos). Isso facilita muito a conta matemática.\n    const cur = now.getHours()*60+now.getMinutes();\n    \n    // Define inHours como 'true' se os minutos atuais forem maiores/iguais ao horário de abertura E menores/iguais ao fechamento\n    inHours = cur >= oh*60+om && cur <= ch*60+cm;\n  }\n}\n\n// 6. RETORNO DOS DADOS PARA O N8N\n// Junta todo o contexto anterior (...ctx) com as novas informações mapeadas e envia para o próximo nó\nreturn [{ \n  json: { \n    ...ctx, \n    company_name: cd?.name || 'Empresa', // Nome da empresa ou um padrão\n    welcome_message: sd?.welcome_message || 'Ola! Como posso ajudar?', // Mensagem de boas-vindas do BD\n    fallback_message: sd?.fallback_message || 'Nao entendi. Pode repetir?', // Mensagem de erro do BD\n    off_hours_message: sd?.off_hours_message || 'Estamos fora do horario de atendimento.', // Mensagem de ausência\n    inHours // Variável booleana (true/false) informando se a empresa está aberta agora\n  } \n}];"
+      },
+      "id": "75d27f41-5059-47ed-b012-e083191790a0",
+      "name": "Verificar Horario e Montar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13248,
+        17776
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "in-hours-check",
+              "leftValue": "={{ $json.inHours }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b9a37d19-a406-4092-8a9c-f1c0aae4e0cf",
+      "name": "Fora do Horario",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        13488,
+        17776
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Montar Contexto da Empresa').first().json.uazapi_base_url }}/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $('Montar Contexto da Empresa').first().json.uazapi_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"number\": \"{{ $('Montar Contexto da Empresa').first().json.phone }}\", \"text\": \"{{ $('Verificar Horario e Montar Dados').first().json.off_hours_message }}\" }",
+        "options": {}
+      },
+      "id": "e05232da-5b47-4052-859b-43642c0dcdfa",
+      "name": "Enviar Mensagem de Ausencia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13792,
+        17616
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=eq.{{ $('Montar Contexto da Empresa').first().json.phone }}"
+            },
+            {
+              "name": "company_id",
+              "value": "=eq.{{ $('Montar Contexto da Empresa').first().json.company_id }}"
+            },
+            {
+              "name": "select",
+              "value": "id,name,current_status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "68b84c5f-35d3-4676-b1ff-92ec580bd6cc",
+      "name": "Buscar Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13776,
+        17872
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "lead-exists",
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "25bfbd02-9057-4b65-9e6e-9b04e6626a50",
+      "name": "Lead Existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        14096,
+        17840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"company_id\": \"{{ $('Montar Contexto da Empresa').first().json.company_id }}\", \"phone\": \"{{ $('Montar Contexto da Empresa').first().json.phone }}\", \"name\": \"{{ $('Montar Contexto da Empresa').first().json.name }}\", \"current_status\": \"new\", \"last_interaction\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "c5197fd6-8531-4fea-a43f-f97d0c57a4c0",
+      "name": "Criar Novo Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14336,
+        17744
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/leads?id=eq.{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"last_interaction\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "cfebee69-25b0-4db5-a869-4f77789bb29f",
+      "name": "Atualizar Lead Existente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14336,
+        17952
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let lead;\ntry { const c = $('Criar Novo Lead').first().json; lead = Array.isArray(c) ? c[0] : c; }\ncatch { const f = $('Buscar Lead').first().json; lead = Array.isArray(f) ? f[0] : f; }\nconst ctx = $('Montar Contexto da Empresa').first().json;\nconst hr = $('Verificar Horario e Montar Dados').first().json;\nreturn [{ json: { ...ctx, company_name: hr.company_name, welcome_message: hr.welcome_message, fallback_message: hr.fallback_message, lead_id: lead.id, lead_name: lead.name, lead_status: lead.current_status, is_new_lead: lead.current_status === 'new' } }];"
+      },
+      "id": "6af14815-dc44-43f9-9303-34a11bf8cf20",
+      "name": "Consolidar Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14576,
+        17840
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/conversations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lead_id",
+              "value": "=eq.{{ $json.lead_id }}"
+            },
+            {
+              "name": "status",
+              "value": "=eq.open"
+            },
+            {
+              "name": "order",
+              "value": "started_at.desc"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            },
+            {
+              "name": "select",
+              "value": "id,status,active_flow_id,current_flow_step_id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f32b5322-389b-42c8-8318-c20612013d0e",
+      "name": "Buscar Conversa Ativa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14816,
+        17840
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "conv-exists",
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "65bb875c-666c-4f13-8352-9f0ad650eb2b",
+      "name": "Conversa Existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        15056,
+        17840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/conversations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"company_id\": \"{{ $('Consolidar Lead').first().json.company_id }}\", \"lead_id\": \"{{ $('Consolidar Lead').first().json.lead_id }}\", \"status\": \"open\", \"started_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "7bb4dc16-15f9-44f6-8d05-72ec8ad444b4",
+      "name": "Criar Nova Conversa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15280,
+        17728
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let cid;\nlet active_flow_id = null;\nlet current_flow_step_id = null;\nlet isNewConversation = false;\n\ntry {\n  const c = $('Criar Nova Conversa').first().json;\n  const arr = Array.isArray(c) ? c : [c];\n  cid = arr[0].id;\n  isNewConversation = true;\n} catch {\n  const f = $('Buscar Conversa Ativa').first().json;\n  const arr = Array.isArray(f) ? f : [f];\n  cid = arr[0].id;\n  active_flow_id = arr[0].active_flow_id;\n  current_flow_step_id = arr[0].current_flow_step_id;\n  isNewConversation = false;\n}\n\nreturn [{ \n  json: { \n    ...$('Consolidar Lead').first().json, \n    conversation_id: cid, \n    active_flow_id,\n    current_flow_step_id,\n    is_new_conversation: isNewConversation \n  } \n}];"
+      },
+      "id": "110b6549-71ee-4c89-88ed-4b7cbe16c6c6",
+      "name": "Consolidar Conversa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15536,
+        17856
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "conversation_id",
+              "value": "=eq.{{ $json.conversation_id }}"
+            },
+            {
+              "name": "order",
+              "value": "created_at.desc"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "select",
+              "value": "sender_type,content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fc383c76-aa58-4a04-a615-5641c8cb2e00",
+      "name": "Buscar Historico",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16784,
+        17344
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/faqs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "company_id",
+              "value": "=eq.{{ $('Consolidar Conversa').first().json.company_id }}"
+            },
+            {
+              "name": "select",
+              "value": "question,answer"
+            },
+            {
+              "name": "limit",
+              "value": "30"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b9dddae-440f-441b-81a5-c7090e8f2a20",
+      "name": "Buscar FAQs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16784,
+        17552
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/products",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "company_id",
+              "value": "=eq.{{ $('Consolidar Conversa').first().json.company_id }}"
+            },
+            {
+              "name": "active",
+              "value": "=eq.true"
+            },
+            {
+              "name": "select",
+              "value": "name,description,price"
+            },
+            {
+              "name": "limit",
+              "value": "30"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2c4e284-6753-4390-b30f-6c08d366b827",
+      "name": "Buscar Produtos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16784,
+        17744
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst ctx = $('Montar Prompt para IA').first().json;\nconst reply = r?.choices?.[0]?.message?.content || ctx.fallback_message || 'Nao consegui processar. Tente novamente.';\nreturn [{ json: { ...ctx, reply } }];"
+      },
+      "id": "4a673cff-3c00-486d-97b0-aa39d15c0b36",
+      "name": "Extrair Resposta da IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17968,
+        17552
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"conversation_id\": \"{{ $json.conversation_id }}\", \"sender_type\": \"lead\", \"content\": {{ JSON.stringify($json.message) }}, \"message_type\": \"text\" }",
+        "options": {}
+      },
+      "id": "4b0426d7-e5c8-42b0-ad65-a2250820f387",
+      "name": "Salvar Mensagem do Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18208,
+        17440
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"conversation_id\": \"{{ $('Extrair Resposta da IA').first().json.conversation_id }}\", \"sender_type\": \"bot\", \"content\": {{ JSON.stringify($('Extrair Resposta da IA').first().json.reply) }}, \"message_type\": \"text\" }",
+        "options": {}
+      },
+      "id": "9e96b70a-ee7b-41ea-8ce2-1b53fa1fa5cf",
+      "name": "Salvar Resposta do Bot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18208,
+        17648
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extrair Resposta da IA').first().json.uazapi_base_url }}/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $('Extrair Resposta da IA').first().json.uazapi_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"number\": \"{{ $('Extrair Resposta da IA').first().json.phone }}\", \"text\": {{ JSON.stringify($('Extrair Resposta da IA').first().json.reply) }} }",
+        "options": {}
+      },
+      "id": "51895199-69dc-4b8d-b1f1-e9e1a0732913",
+      "name": "Enviar Resposta via UAZAPI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18448,
+        17552
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        12992,
+        17776
+      ],
+      "id": "1ec75065-6ee2-4848-b7f3-fb21612cb9b0",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        17184,
+        17536
+      ],
+      "id": "82a282d1-b226-455a-9b7b-575b45698a79",
+      "name": "Merge7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ctx = $('Consolidar Conversa').first().json;\nconst historyRaw = $('Buscar Historico').first().json;\nconst faqsRaw = $('Buscar FAQs').first().json;\nconst productsRaw = $('Buscar Produtos').first().json;\n\n// Garantir que são arrays\nconst history = (Array.isArray(historyRaw) ? historyRaw : []).reverse();\nconst faqs = Array.isArray(faqsRaw) ? faqsRaw : [];\nconst products = Array.isArray(productsRaw) ? productsRaw : [];\n\n// Montar as strings de contexto\nconst faqCtx = faqs.length > 0 ? faqs.map(f => `P: ${f.question}\\nR: ${f.answer}`).join('\\n\\n') : 'Nenhuma FAQ cadastrada.';\nconst prodCtx = products.length > 0 ? products.map(p => { \n  let l = `- ${p.name}`; \n  if (p.description) l += `: ${p.description}`; \n  if (p.price) l += ` (R$ ${parseFloat(p.price).toFixed(2)})`; \n  return l; \n}).join('\\n') : 'Nenhum produto cadastrado.';\n\n// Montar o histórico de mensagens formatado para a IA\nconst histMsgs = history.map(m => ({ \n  role: m.sender_type === 'bot' ? 'assistant' : 'user', \n  content: String(m.content || '') \n}));\n\n// Montar o System Prompt\nconst systemPrompt = `Você é um assistente de atendimento da empresa \"${ctx.company_name}\". Ajude clientes de forma cordial, objetiva e natural.\n\nREGRAS:\n- Responda SEMPRE em português brasileiro\n- Seja conciso (máximo 3 parágrafos)\n- Use emojis com moderação\n- NÃO invente informações\n- Se não souber, use o fallback\n- Se o cliente quiser um humano, informe que vai encaminhar\n\nFAQ:\n${faqCtx}\n\nPRODUTOS/SERVIÇOS:\n${prodCtx}\n\nFALLBACK: ${ctx.fallback_message || 'Um momento, vou transferir você para um atendente.'}`;\n\n// Juntar as mensagens na ordem correta: System -> Histórico -> Mensagem Atual do Usuário\nconst messagesArray = [\n  { role: \"system\", content: systemPrompt },\n  ...histMsgs,\n  { role: \"user\", content: String(ctx.message || '') }\n];\n\n// Criar o Body exato que a API exige (usando o Gemini 2.5 Flash)\nconst geminiPayload = {\n  model: \"gemini-2.5-flash\", \n  messages: messagesArray,\n  max_tokens: 600,\n  temperature: 0.7\n};\n\n// Retornar os dados originais + o payload pronto\nreturn [{ \n  json: { \n    ...ctx, \n    systemPrompt, \n    geminiPayload \n  } \n}];"
+      },
+      "id": "b18d5a34-b001-4485-8e5b-8cb8160a902d",
+      "name": "Montar Prompt para IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17440,
+        17552
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.geminiPayload }}",
+        "options": {}
+      },
+      "id": "3b2fa96f-27ce-496f-93d7-74cdb656340f",
+      "name": "Chamar Gemini Gratuito",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        17680,
+        17552
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rcQCCYDeXBWNXCvv",
+          "name": "GEMINI API - CPSFLOW"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/flows",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "company_id",
+              "value": "=eq.{{ $json.company_id }}"
+            },
+            {
+              "name": "active",
+              "value": "=eq.true"
+            },
+            {
+              "name": "select",
+              "value": "id,name,trigger_type,trigger_keywords,priority,flow_type,template_slug,config,steps:flow_steps(id,step_order,step_type,message,metadata)"
+            },
+            {
+              "name": "order",
+              "value": "priority.asc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "36fd3106-69dd-4070-a3a8-00e543a3e051",
+      "name": "Buscar Fluxos Ativos1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15792,
+        17856
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// STATE MACHINE ROUTER v5\n// Prioridade de decisão:\n//   1. Contexto ativo (active_flow_id) -> continua fluxo\n//   2. Gatilho first_message           -> novo fluxo\n//   3. Gatilho keyword                 -> novo fluxo\n//   4. Nenhum match                    -> use_ai = true\n\nconst ctx      = $('Consolidar Conversa').first().json;\nconst allItems = $input.all();\n\n// Todos os fluxos ativos (cada item = 1 fluxo do Supabase)\nconst flows  = allItems.map(i => i.json).filter(f => f && f.id);\nconst msgLower = String(ctx.message || '').toLowerCase().trim();\n\n// PRIORIDADE 1: Cliente ja esta no meio de um fluxo?\n// Se sim, NAO tenta keyword matching. Continua de onde parou.\nif (ctx.active_flow_id) {\n  const activeFlow = flows.find(f => f.id === ctx.active_flow_id);\n  if (activeFlow) {\n    const steps = Array.isArray(activeFlow.steps)\n      ? activeFlow.steps.sort((a, b) => a.step_order - b.step_order)\n      : [];\n    return [{ json: {\n      ...ctx,\n      active_flow:  activeFlow,\n      all_flows:    flows,\n      flow_steps:   steps,\n      use_ai:       false,\n      is_continuing: true\n    }}];\n  }\n  // active_flow_id existe mas fluxo foi deletado/desativado - cai no matching abaixo\n}\n\n// PRIORIDADE 2 e 3: Tenta acionar novo fluxo por trigger\nconst sorted = [...flows].sort((a, b) => (a.priority || 10) - (b.priority || 10));\n\nfor (const flow of sorted) {\n  const keywords    = flow.trigger_keywords || [];\n  const triggerType = flow.trigger_type || 'keyword';\n  const steps       = Array.isArray(flow.steps)\n    ? flow.steps.sort((a, b) => a.step_order - b.step_order)\n    : [];\n\n  if (steps.length === 0) continue;\n\n  // first_message: so na primeira mensagem de uma conversa nova\n  if (triggerType === 'first_message') {\n    if (ctx.is_new_conversation === true && ctx.is_new_lead === true) {\n      return [{ json: {\n        ...ctx,\n        active_flow:   flow,\n        all_flows:     flows,\n        flow_steps:    steps,\n        use_ai:        false,\n        is_continuing: false\n      }}];\n    }\n    continue;\n  }\n\n  // keyword: mensagem contem alguma palavra-chave\n  if (triggerType === 'keyword' && keywords.length > 0) {\n    const hit = keywords.some(kw => msgLower.includes(String(kw).toLowerCase().trim()));\n    if (hit) {\n      return [{ json: {\n        ...ctx,\n        active_flow:   flow,\n        all_flows:     flows,\n        flow_steps:    steps,\n        use_ai:        false,\n        is_continuing: false\n      }}];\n    }\n  }\n}\n\n// PRIORIDADE 4: sem match -> usa IA\nreturn [{ json: {\n  ...ctx,\n  active_flow:   null,\n  all_flows:     flows,\n  flow_steps:    [],\n  use_ai:        true,\n  is_continuing: false\n}}];"
+      },
+      "id": "e6817c56-dd50-4a1e-ae14-0aa95dd41ad6",
+      "name": "Decidir Fluxo ou IA1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16064,
+        17856
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "use-ai-check",
+              "leftValue": "={{ $json.use_ai }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "aff2c463-0092-4b87-b119-1e55f0fd9d48",
+      "name": "Usar IA ou Fluxo1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        16320,
+        17856
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"conversation_id\": \"{{ $json.conversation_id }}\", \"sender_type\": \"lead\", \"content\": {{ JSON.stringify($json.message) }}, \"message_type\": \"text\" }",
+        "options": {}
+      },
+      "id": "aec7cc50-9ad7-4522-aaf0-771eb80c0f0e",
+      "name": "Salvar Msg Cliente Fluxo1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        17488,
+        17872
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/leads?id=eq.{{ $json.lead_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"current_status\": \"contacted\", \"last_interaction\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "0079a8d6-560d-4097-b560-f0dfaa3b0392",
+      "name": "Marcar Lead como Contatado1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        17488,
+        18080
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/conversations?id=eq.{{ $json.conversation_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"active_flow_id\": {{ $json.new_active_flow_id ? '\"' + $json.new_active_flow_id + '\"' : \"null\" }}, \"current_flow_step_id\": {{ $json.new_current_step_id ? '\"' + $json.new_current_step_id + '\"' : \"null\" }} }",
+        "options": {}
+      },
+      "id": "9b2b1eaf-4500-42c3-9d4f-5c0e4a1467d5",
+      "name": "Atualizar Estado do Fluxo1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        17488,
+        18304
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// STATE MACHINE ENGINE v5.1\n//\n// step_type behavior:\n//   message   -> send immediately, advance\n//   question  -> send message, PAUSE awaiting reply\n//   condition -> send menu, PAUSE awaiting numeric option\n//   catalog   -> build products_list, send, PAUSE\n//   end       -> send final message, END flow\n\nconst ctx       = $json;\nconst allFlows  = Array.isArray(ctx.all_flows) ? ctx.all_flows : [];\n\n// Products array comes from Buscar Produtos1 (accessed via node reference)\n// We resolve it here so catalog steps can use {{products_list}}\nlet productsRaw = [];\ntry { \n  const raw = $('Buscar Produtos').all();\n  productsRaw = raw.map(i => i.json).filter(p => p && p.name);\n} catch(e) { productsRaw = []; }\n\nconst productsList = productsRaw.length > 0\n  ? productsRaw.map((p, i) => {\n      let line = (i + 1) + '. ' + p.name;\n      if (p.description) line += ' - ' + p.description;\n      if (p.price) line += ' (R$ ' + parseFloat(p.price).toFixed(2) + ')';\n      return line;\n    }).join('\\n')\n  : 'Nenhum produto cadastrado ainda.';\n\nlet steps          = Array.isArray(ctx.flow_steps) ? ctx.flow_steps : [];\nlet flow           = ctx.active_flow || {};\nlet config         = flow.config || {};\nlet isContinuing   = ctx.is_continuing === true;\nlet currentStepId  = ctx.current_flow_step_id || null;\nlet userMessage    = String(ctx.message || '').trim();\n\nlet startIndex     = 0;\nlet messagesToSend = [];\nlet pausedAtStep   = null;\nlet ended          = false;\nlet newActiveFlowId = flow.id || null;\n\n// PHASE 1: PROCESS CLIENT RESPONSE\nif (isContinuing && currentStepId) {\n  const currentIdx = steps.findIndex(s => s.id === currentStepId);\n\n  if (currentIdx >= 0) {\n    const pausedStep = steps[currentIdx];\n\n    if (pausedStep.step_type === 'condition') {\n      const routes = (pausedStep.metadata && pausedStep.metadata.routes)\n        ? pausedStep.metadata.routes : {};\n\n      let matchedFlowId = null;\n      for (const [key, targetId] of Object.entries(routes)) {\n        if (userMessage.toLowerCase() === String(key).toLowerCase()) {\n          matchedFlowId = targetId;\n          break;\n        }\n      }\n\n      if (matchedFlowId) {\n        const targetFlow = allFlows.find(f => f.id === matchedFlowId);\n        if (targetFlow) {\n          flow            = targetFlow;\n          config          = flow.config || {};\n          steps           = Array.isArray(targetFlow.steps)\n            ? targetFlow.steps.sort((a, b) => a.step_order - b.step_order) : [];\n          startIndex      = 0;\n          newActiveFlowId = targetFlow.id;\n        } else {\n          messagesToSend.push('Esta opcao nao esta disponivel no momento. Tente novamente.');\n          pausedAtStep = pausedStep;\n          startIndex   = steps.length;\n        }\n      } else {\n        messagesToSend.push('Opcao invalida. Por favor, digite apenas o numero correspondente a sua escolha.');\n        pausedAtStep = pausedStep;\n        startIndex   = steps.length;\n      }\n    }\n    else if (pausedStep.step_type === 'question') {\n      startIndex = currentIdx + 1;\n    }\n    else {\n      startIndex = currentIdx + 1;\n    }\n  } else {\n    startIndex = 0;\n  }\n}\n\n// PHASE 2: EXECUTE STEPS\nfunction interpolate(text) {\n  let s = String(text || '');\n  for (const [k, v] of Object.entries(config)) {\n    s = s.replace(new RegExp('{{' + k + '}}', 'g'), String(v != null ? v : ''));\n  }\n  return s\n    .replace(/{{products_list}}/g, productsList)\n    .replace(/{{company_name}}/g,  ctx.company_name || '')\n    .replace(/{{lead_name}}/g,     ctx.lead_name || ctx.name || 'Cliente')\n    .replace(/{{nome}}/g,          ctx.lead_name || ctx.name || 'Cliente')\n    .replace(/{{phone}}/g,         ctx.phone || '');\n}\n\nfor (let i = startIndex; i < steps.length; i++) {\n  const step = steps[i];\n\n  if (step.step_type === 'end') {\n    ended = true;\n    const content = interpolate(step.message);\n    if (content.trim()) messagesToSend.push(content);\n    break;\n  }\n\n  const content = interpolate(step.message);\n  if (content.trim()) messagesToSend.push(content);\n\n  if (['question', 'catalog', 'condition'].includes(step.step_type)) {\n    pausedAtStep = step;\n    break;\n  }\n}\n\n// PHASE 3: OUTPUT\nreturn [{ json: {\n  ...ctx,\n  products_list:       productsList,\n  messages_to_send:    messagesToSend,\n  new_active_flow_id:  ended ? null : (newActiveFlowId || null),\n  new_current_step_id: pausedAtStep ? pausedAtStep.id : null,\n  flow_ended:          ended,\n  flow_executed:       true\n}}];"
+      },
+      "id": "27ea0519-0651-4180-9d3c-9beb5529ba64",
+      "name": "Executar Etapas do Fluxo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        17152,
+        18304
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1e179ee4-d516-47e6-93dc-83d2ed242d32",
+      "name": "Loop de Mensagens1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        17728,
+        18560
+      ]
+    },
+    {
+      "parameters": {
+        "unit": "seconds"
+      },
+      "id": "9f7aeb0c-f27e-4c8f-8c00-424b363f6744",
+      "name": "Delay 1s1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        18016,
+        18928
+      ],
+      "webhookId": "f230fe67-ddc5-4654-8317-6fdfa2040adc"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "messages_to_send",
+        "options": {
+          "destinationFieldName": "message_text"
+        }
+      },
+      "id": "d1e3b49a-ab29-44c2-9a88-18e744ebf360",
+      "name": "Separar Mensagens1",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        17536,
+        18560
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Executar Etapas do Fluxo').first().json.uazapi_base_url }}/send/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $('Executar Etapas do Fluxo').first().json.uazapi_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"number\": \"{{ $('Executar Etapas do Fluxo').first().json.phone }}\", \"text\": {{ JSON.stringify($json.message_text) }} }",
+        "options": {}
+      },
+      "id": "31ca0506-17fb-47c3-bbaf-cbefffa1e6b6",
+      "name": "Enviar Resposta do Fluxo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18016,
+        18592
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hdzvqxfrgzzmvwsehcna.supabase.co/rest/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"conversation_id\": \"{{ $('Executar Etapas do Fluxo').first().json.conversation_id }}\", \"sender_type\": \"bot\", \"content\": {{ JSON.stringify($json.message_text) }}, \"message_type\": \"text\" }",
+        "options": {}
+      },
+      "id": "ca1e9bfb-719c-4ba4-84ca-bb8c83503ded",
+      "name": "Salvar Resp Bot Fluxo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        18016,
+        18768
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "nNae98aGIH8ASI3Q",
+          "name": "CPSFLOW SUPABASE"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Verificar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Separar Mensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔔 Webhook UAZAPI": {
+      "main": [
+        [
+          {
+            "node": "Resposta 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extrair Dados da Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados da Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Buscar Empresa por Instancia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Empresa por Instancia": {
+      "main": [
+        [
+          {
+            "node": "Montar Contexto da Empresa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Contexto da Empresa": {
+      "main": [
+        [
+          {
+            "node": "Buscar Configuracoes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Nome da Empresa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Configuracoes": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Nome da Empresa": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Verificar Horario e Montar Dados": {
+      "main": [
+        [
+          {
+            "node": "Fora do Horario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fora do Horario": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensagem de Ausencia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lead": {
+      "main": [
+        [
+          {
+            "node": "Lead Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Existe": {
+      "main": [
+        [
+          {
+            "node": "Criar Novo Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Atualizar Lead Existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Novo Lead": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Lead Existente": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Lead": {
+      "main": [
+        [
+          {
+            "node": "Buscar Conversa Ativa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Conversa Ativa": {
+      "main": [
+        [
+          {
+            "node": "Conversa Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversa Existe": {
+      "main": [
+        [
+          {
+            "node": "Criar Nova Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consolidar Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Nova Conversa": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Conversa": {
+      "main": [
+        [
+          {
+            "node": "Buscar Fluxos Ativos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Historico": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar FAQs": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar Produtos": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Extrair Resposta da IA": {
+      "main": [
+        [
+          {
+            "node": "Salvar Mensagem do Cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salvar Resposta do Bot",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar Resposta via UAZAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Verificar Horario e Montar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge7": {
+      "main": [
+        [
+          {
+            "node": "Montar Prompt para IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Prompt para IA": {
+      "main": [
+        [
+          {
+            "node": "Chamar Gemini Gratuito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chamar Gemini Gratuito": {
+      "main": [
+        [
+          {
+            "node": "Extrair Resposta da IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Fluxos Ativos1": {
+      "main": [
+        [
+          {
+            "node": "Decidir Fluxo ou IA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir Fluxo ou IA1": {
+      "main": [
+        [
+          {
+            "node": "Usar IA ou Fluxo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usar IA ou Fluxo1": {
+      "main": [
+        [
+          {
+            "node": "Buscar Historico",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar FAQs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Produtos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Executar Etapas do Fluxo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar Etapas do Fluxo": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Estado do Fluxo1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Marcar Lead como Contatado1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salvar Msg Cliente Fluxo1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop de Mensagens1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Enviar Resposta do Fluxo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salvar Resp Bot Fluxo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delay 1s1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay 1s1": {
+      "main": [
+        [
+          {
+            "node": "Loop de Mensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Mensagens1": {
+      "main": [
+        [
+          {
+            "node": "Loop de Mensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "🔔 Webhook UAZAPI": [
+      {
+        "headers": {
+          "host": "cpscode-n8n-a10e213ca132.herokuapp.com",
+          "user-agent": "uazapiGO-Webhook/1.0",
+          "content-length": "2502",
+          "accept-encoding": "gzip",
+          "content-type": "application/json",
+          "server": "Heroku",
+          "via": "1.1 heroku-router",
+          "x-forwarded-for": "177.234.159.170",
+          "x-forwarded-port": "443",
+          "x-forwarded-proto": "https",
+          "x-request-id": "99fb0a38-81e9-c407-a952-3d3c76becbf3",
+          "x-request-start": "1779847017388"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "BaseUrl": "https://free.uazapi.com",
+          "EventType": "messages",
+          "chat": {
+            "chatbot_agentResetMemoryAt": 0,
+            "chatbot_disableUntil": 0,
+            "chatbot_lastTriggerAt": 0,
+            "chatbot_lastTrigger_id": "",
+            "id": "rd4d337b9a1b064",
+            "image": "",
+            "imagePreview": "https://pps.whatsapp.net/v/t61.24694-24/518810044_1853910978559985_4361472524458739003_n.jpg?stp=dst-jpg_s96x96_tt6&ccb=11-4&oh=01_Q5Aa4gH7KFL-LInR_bEXmEHkBqnzBpPkzZ6EOgZcxbpLV220mQ&oe=6A2261E2&_nc_sid=5e03e0&_nc_cat=107",
+            "lead_assignedAttendant_id": "",
+            "lead_email": "",
+            "lead_field01": "",
+            "lead_field02": "",
+            "lead_field03": "",
+            "lead_field04": "",
+            "lead_field05": "",
+            "lead_field06": "",
+            "lead_field07": "",
+            "lead_field08": "",
+            "lead_field09": "",
+            "lead_field10": "",
+            "lead_field11": "",
+            "lead_field12": "",
+            "lead_field13": "",
+            "lead_field14": "",
+            "lead_field15": "",
+            "lead_field16": "",
+            "lead_field17": "",
+            "lead_field18": "",
+            "lead_field19": "",
+            "lead_field20": "",
+            "lead_fullName": "",
+            "lead_isTicketOpen": false,
+            "lead_kanbanOrder": 0,
+            "lead_name": "",
+            "lead_notes": "",
+            "lead_personalid": "",
+            "lead_status": "",
+            "lead_tags": [],
+            "name": "Meu Numero",
+            "owner": "5516994251058",
+            "phone": "+55 16 99425-1058",
+            "wa_archived": false,
+            "wa_chatid": "5516994251058@s.whatsapp.net",
+            "wa_chatlid": "241201085190189@lid",
+            "wa_contactName": "Meu Numero",
+            "wa_ephemeralExpiration": 0,
+            "wa_fastid": "5516994251058:5516994251058",
+            "wa_isBlocked": false,
+            "wa_isGroup": false,
+            "wa_isGroup_admin": false,
+            "wa_isGroup_announce": false,
+            "wa_isGroup_community": false,
+            "wa_isGroup_member": false,
+            "wa_isPinned": false,
+            "wa_label": [],
+            "wa_lastMessageSender": "241201085190189@lid",
+            "wa_lastMessageTextVote": "1",
+            "wa_lastMessageType": "Conversation",
+            "wa_lastMsgTimestamp": 1779847016000,
+            "wa_muteEndTime": 0,
+            "wa_name": "Bruno Campos",
+            "wa_notes": "",
+            "wa_unreadCount": 0
+          },
+          "chatSource": "updated",
+          "instanceName": "loja-do-bruno",
+          "message": {
+            "buttonOrListid": "",
+            "chatid": "5516994251058@s.whatsapp.net",
+            "chatlid": "241201085190189@lid",
+            "content": "1",
+            "convertOptions": "",
+            "edited": "",
+            "fromMe": true,
+            "groupName": "",
+            "id": "5516994251058:3EB0E346081B7C0248FD4D",
+            "isGroup": false,
+            "mediaType": "",
+            "messageTimestamp": 1779847016000,
+            "messageType": "Conversation",
+            "messageid": "3EB0E346081B7C0248FD4D",
+            "owner": "5516994251058",
+            "pinned": false,
+            "quoted": "",
+            "reaction": "",
+            "sender": "241201085190189@lid",
+            "senderName": "Bruno Campos",
+            "sender_lid": "241201085190189@lid",
+            "sender_pn": "5516994251058@s.whatsapp.net",
+            "source": "web",
+            "status": "",
+            "text": "1",
+            "track_id": "",
+            "track_source": "",
+            "type": "text",
+            "vote": "",
+            "wasSentByApi": false
+          },
+          "owner": "5516994251058",
+          "token": "8d27c363-ff62-445a-8487-1eec244d010c"
+        },
+        "webhookUrl": "https://cpscode-n8n-a10e213ca132.herokuapp.com/webhook/n8n-cpsflow-8asgd8h38hr83",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "f20849e5adf99cb1346747feeea36683cd3df67cc2635f8ad425d5ffe7945f55"
+  }
+}

@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Atendente Inteligente para WhatsApp
 
-## Getting Started
+Front-end SaaS em Next.js para configurar atendimento automatico no WhatsApp.
+O projeto usa App Router, React, Tailwind CSS, componentes estilo ShadCN UI,
+dados mockados e uma estrutura preparada para futura integracao com Firebase.
 
-First, run the development server:
+## Estrutura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```txt
+app/
+  (auth)/
+    login/
+    register/
+  (dashboard)/
+    dashboard/
+    configuracoes/
+    produtos/
+    fluxos/
+    mensagens/
+components/
+  layout/
+  ui/
+hooks/
+lib/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Paginas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/login`: tela de acesso.
+- `/register`: cadastro inicial da empresa.
+- `/dashboard`: visao geral do bot, mensagens e conversas recentes.
+- `/configuracoes`: empresa, horario e mensagem fora do horario.
+- `/produtos`: lista, criacao, edicao e exclusao local.
+- `/fluxos`: fluxos por etapas com mensagens editaveis.
+- `/mensagens`: FAQ e respostas automaticas.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Rodar o projeto
 
-## Learn More
+Instale dependencias e execute o servidor local:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Depois acesse http://localhost:3000.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Validacao
 
-## Deploy on Vercel
+```bash
+npm run lint
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Observacoes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Nao ha backend completo nesta etapa.
+- Os dados estao em `lib/mock-data.ts`.
+- A futura configuracao Firebase tem placeholder em `lib/firebase.ts`.
+- Os componentes base ficam em `components/ui`, seguindo a proposta visual do ShadCN UI.
