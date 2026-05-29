@@ -12,7 +12,7 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen scroll-smooth bg-slate-950 text-slate-100 antialiased">
+    <div className="landing-page min-h-screen scroll-smooth bg-slate-950 text-slate-100 antialiased">
       <LandingNav />
       <main>
         <Hero />

@@ -238,8 +238,8 @@ body {
 /* ─── LIGHT MODE FIXES ─── */
 
 /* Garante que o header e sidebar no light mode tenham fundo visível */
-:root:not(.dark) header,
-html:not(.dark) header {
+:root:not(.dark) header:not(.landing-header),
+html:not(.dark) header:not(.landing-header) {
   background-color: hsl(var(--card) / 0.85) !important;
   border-bottom-color: hsl(var(--border)) !important;
 }
@@ -278,4 +278,22 @@ html:not(.dark) [class*="bg-white/"] {
 /* Scrollbar no light */
 html:not(.dark) ::-webkit-scrollbar-thumb {
   background: hsl(214 16% 80%);
+}
+
+/* ─── LANDING PAGE (sempre escura) ───
+   A landing usa overlays translúcidos sobre fundo escuro.
+   Neutralizamos aqui os overrides de light mode para que ela
+   fique correta independente do tema escolhido pelo usuário. */
+
+html .landing-page [class*="bg-white/[0.02]"] {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+html .landing-page [class*="bg-white/[0.03]"] {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+html .landing-page [class*="bg-white/[0.05]"] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+html .landing-page [class*="bg-white/5"] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }

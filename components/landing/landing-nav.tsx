@@ -27,7 +27,7 @@ export function LandingNav() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        "landing-header fixed inset-x-0 top-0 z-50 transition-all duration-300",
         scrolled
           ? "border-b border-white/10 bg-slate-950/70 backdrop-blur-xl"
           : "border-b border-transparent bg-transparent",
