@@ -1,28 +1,30 @@
 import * as React from "react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
   size?: "sm" | "md" | "lg" | "icon";
+  loading?: boolean;
 };
 
 const variants = {
   primary:
-    "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:brightness-110 border border-emerald-400/30 dark:shadow-emerald-500/15 dark:hover:shadow-emerald-500/25",
+    "bg-primary text-primary-foreground shadow-[0_1px_0_hsl(0_0%_100%/0.18)_inset,0_6px_20px_hsl(158_82%_45%/0.25)] hover:brightness-110 hover:-translate-y-px hover:shadow-[0_1px_0_hsl(0_0%_100%/0.22)_inset,0_10px_30px_hsl(158_82%_45%/0.35)]",
   secondary:
-    "bg-secondary text-secondary-foreground shadow-sm hover:bg-accent border border-border",
+    "bg-secondary text-secondary-foreground border border-border hover:bg-accent",
   outline:
-    "border border-border bg-card/50 text-foreground shadow-sm hover:bg-accent hover:border-border glass-subtle",
+    "border border-border bg-card/40 text-foreground backdrop-blur-sm hover:bg-accent hover:border-border/80",
   ghost:
     "text-muted-foreground hover:bg-accent hover:text-foreground",
   danger:
-    "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300",
+    "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/15 dark:bg-destructive/15 dark:hover:bg-destructive/25",
 };
 
 const sizes = {
-  sm: "h-8 px-3 text-xs",
-  md: "h-10 px-4 text-sm",
-  lg: "h-12 px-6 text-base",
+  sm: "h-8 px-3 text-xs gap-1.5",
+  md: "h-10 px-4 text-sm gap-2",
+  lg: "h-12 px-6 text-[15px] gap-2",
   icon: "h-9 w-9 p-0",
 };
 
@@ -31,18 +33,25 @@ export function Button({
   variant = "primary",
   size = "md",
   type = "button",
+  loading = false,
+  disabled,
+  children,
   ...props
 }: ButtonProps) {
   return (
     <button
       type={type}
+      disabled={disabled || loading}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97]",
+        "inline-flex shrink-0 items-center justify-center rounded-xl font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97]",
         variants[variant],
         sizes[size],
         className,
       )}
       {...props}
-    />
+    >
+      {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+      {children}
+    </button>
   );
 }

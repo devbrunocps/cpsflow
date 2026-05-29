@@ -41,7 +41,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='light'?false:t==='dark'?true:(t==='system'?window.matchMedia('(prefers-color-scheme: dark)').matches:true);var c=document.documentElement.classList;if(d){c.add('dark')}else{c.remove('dark')}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${poppins.variable} ${poppins.className} antialiased`}>
         <Providers>{children}</Providers>
       </body>

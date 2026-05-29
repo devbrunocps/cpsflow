@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { KeyRound } from "lucide-react";
+import { KeyRound, CheckCircle2 } from "lucide-react";
+import { BrandLockup } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -75,8 +76,8 @@ function ResetForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-500/15">
-          <KeyRound className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
+          <KeyRound className="h-6 w-6" />
         </div>
         <CardTitle className="text-center text-xl">Redefinir senha</CardTitle>
         <CardDescription className="text-center">
@@ -86,8 +87,9 @@ function ResetForm() {
       <CardContent>
         {success ? (
           <div className="space-y-4 text-center">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-              ✅ Senha redefinida com sucesso! Redirecionando para o login...
+            <div className="flex items-center justify-center gap-2.5 rounded-xl border border-primary/20 bg-primary/10 p-4 text-sm text-foreground">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              Senha redefinida com sucesso! Redirecionando para o login...
             </div>
           </div>
         ) : (
@@ -138,9 +140,16 @@ function ResetForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-emerald-950/10 p-4">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
+      <div className="bg-aurora pointer-events-none absolute inset-0 opacity-60" />
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
+      <div className="relative z-10 mb-8">
+        <BrandLockup />
+      </div>
       <Suspense fallback={null}>
-        <ResetForm />
+        <div className="relative z-10 w-full max-w-md animate-enter">
+          <ResetForm />
+        </div>
       </Suspense>
     </div>
   );

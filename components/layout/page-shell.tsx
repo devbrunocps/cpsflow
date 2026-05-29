@@ -58,11 +58,7 @@ export async function PageShell({ children }: { children: React.ReactNode }) {
   const sidebarData = await getSidebarData();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-transparent text-foreground">
-      {/* Decorative gradients */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_15%_5%,_rgba(16,185,129,0.07),_transparent_50%),radial-gradient(ellipse_at_85%_10%,_rgba(56,189,248,0.05),_transparent_45%)] dark:bg-[radial-gradient(ellipse_at_15%_5%,_rgba(16,185,129,0.12),_transparent_50%),radial-gradient(ellipse_at_85%_10%,_rgba(56,189,248,0.08),_transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
-
+    <div className="relative min-h-screen bg-transparent text-foreground">
       <Sidebar
         companyName={sidebarData?.companyName ?? "Minha Empresa"}
         companyInitials={sidebarData?.companyInitials ?? "ME"}
@@ -70,9 +66,9 @@ export async function PageShell({ children }: { children: React.ReactNode }) {
         isSuperAdmin={sidebarData?.isSuperAdmin ?? false}
       />
 
-      <div className={cn("relative z-10 lg:pl-72")}>
+      <div className={cn("relative z-10 lg:pl-[264px]")}>
         <Header />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 animate-fade-in">
+        <main className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8 animate-fade-in">
           {children}
         </main>
       </div>

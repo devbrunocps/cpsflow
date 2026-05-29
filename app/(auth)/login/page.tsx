@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -85,11 +85,11 @@ export default function LoginPage() {
 
   return (
     <>
-      <Card className="w-full max-w-md">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl">Entrar no painel</CardTitle>
+          <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
           <CardDescription>
-            Acesse sua conta para gerenciar o atendimento automatico.
+            Acesse seu painel para gerenciar o atendimento com IA no WhatsApp.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -122,7 +122,7 @@ export default function LoginPage() {
                     setResetSent(false);
                     setResetError("");
                   }}
-                  className="text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                  className="text-xs font-medium text-primary transition-colors hover:brightness-110"
                 >
                   Esqueci minha senha
                 </button>
@@ -137,14 +137,14 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            <Button className="w-full" size="lg" type="submit" loading={isLoading}>
               {isLoading ? "Entrando..." : "Entrar"}
               {!isLoading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
             </Button>
           </form>
-          <p className="mt-5 text-center text-sm text-slate-500 dark:text-slate-400">
-            Ainda nao tem conta?{" "}
-            <Link className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300" href="/register">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Ainda não tem conta?{" "}
+            <Link className="font-semibold text-primary transition-colors hover:brightness-110" href="/register">
               Criar cadastro
             </Link>
           </p>
@@ -164,8 +164,12 @@ export default function LoginPage() {
             <CardContent>
               {resetSent ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-                    ✅ Se este e-mail estiver cadastrado, você receberá o link de recuperação em alguns minutos. Verifique também a caixa de spam.
+                  <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/10 p-4 text-sm text-foreground">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    <span>
+                      Se este e-mail estiver cadastrado, você receberá o link de
+                      recuperação em alguns minutos. Verifique também a caixa de spam.
+                    </span>
                   </div>
                   <Button
                     variant="outline"

@@ -4,69 +4,68 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Menu, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { BrandLockup } from "@/components/brand-mark";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const titles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/leads": "Leads",
+  "/atendimento": "Atendimento",
   "/configuracoes": "Configurações",
   "/produtos": "Catálogo de Produtos",
-  "/fluxos": "Fluxos de Atendimento",
-  "/mensagens": "FAQ",
+  "/fluxos": "Fluxos de Venda",
+  "/agendamento": "Agendamento",
+  "/mensagens": "FAQ & Respostas",
   "/admin/usuarios": "Gerenciar Usuários",
 };
 
 const mobileLinks = [
   ["Dashboard", "/dashboard"],
   ["Leads", "/leads"],
-  ["FAQ", "/mensagens"],
+  ["Atendimento", "/atendimento"],
   ["Fluxos de Venda", "/fluxos"],
+  ["FAQ & Respostas", "/mensagens"],
+  ["Agendamento", "/agendamento"],
   ["Catálogo", "/produtos"],
   ["Configurações", "/configuracoes"],
-];
+] as const;
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const title = titles[pathname] ?? "CPSFLOW";
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b border-border/50 bg-card/70 px-4 glass sm:px-6 lg:px-8 dark:border-white/[0.06] dark:bg-slate-950/70">
+    <header className="sticky top-0 z-30 flex h-[68px] items-center gap-3 border-b border-border bg-background/70 px-4 backdrop-blur-2xl sm:px-6 lg:px-8">
+      {/* Mobile menu trigger */}
       <div className="lg:hidden">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => setIsMobileMenuOpen(true)}
-        >
+        <Button variant="outline" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu">
           <Menu className="h-5 w-5" aria-hidden="true" />
         </Button>
 
         {isMobileMenuOpen && (
           <div className="fixed inset-0 z-50 flex animate-fade-in">
-            <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm dark:bg-black/60"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-            <div className="relative w-72 max-w-full border-r border-border/50 bg-card p-6 shadow-2xl animate-slide-up dark:border-white/[0.08] dark:bg-slate-900">
-              <div className="mb-8 flex items-center justify-between">
-                <span className="text-lg font-semibold text-foreground">Menu</span>
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+            <div className="relative w-72 max-w-full border-r border-border bg-card p-5 shadow-2xl animate-slide-up">
+              <div className="mb-6 flex items-center justify-between">
+                <BrandLockup size={36} />
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} aria-label="Fechar menu">
                   <X className="h-5 w-5 text-muted-foreground" />
                 </Button>
               </div>
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-1">
                 {mobileLinks.map(([label, href]) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      "block rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                      "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                       pathname === href
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        ? "bg-primary/10 text-foreground ring-1 ring-primary/15"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
                   >
                     {label}
@@ -78,31 +77,27 @@ export function Header() {
         )}
       </div>
 
-      <div className="flex-1">
-        <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {titles[pathname] ?? "Atendente Inteligente"}
-        </h1>
-        <p className="mt-1 hidden text-xs font-medium text-muted-foreground sm:block">
-          Gerencie seu atendimento no WhatsApp com IA
-        </p>
+      {/* Title */}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <h1 className="truncate text-[15px] font-semibold tracking-tight text-foreground">{title}</h1>
       </div>
 
-      <div className="hidden w-full max-w-sm items-center gap-2 rounded-full border border-border/60 bg-accent/50 px-4 py-1.5 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 md:flex dark:border-white/[0.08] dark:bg-white/[0.04] dark:focus-within:border-emerald-500/40">
-        <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        <Input
-          className="h-7 border-0 bg-transparent px-0 text-sm shadow-none outline-none focus:ring-0"
-          placeholder="Buscar clientes ou fluxos..."
-        />
-      </div>
+      {/* Command search */}
+      <button
+        type="button"
+        className="hidden h-9 items-center gap-2 rounded-xl border border-border bg-background/60 px-3 text-sm text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground md:flex md:w-64 dark:bg-white/[0.03]"
+      >
+        <Search className="h-4 w-4" aria-hidden="true" />
+        <span className="flex-1 text-left">Buscar...</span>
+        <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          ⌘K
+        </kbd>
+      </button>
 
       <ThemeSwitcher />
 
-      <Button 
-        variant="outline" 
-        size="icon" 
-        className="relative rounded-full"
-      >
-        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-card animate-glow-pulse"></span>
+      <Button variant="outline" size="icon" className="relative rounded-xl" aria-label="Notificações">
+        <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-background animate-glow-pulse" />
         <Bell className="h-4 w-4" aria-hidden="true" />
       </Button>
     </header>

@@ -13,17 +13,18 @@ export function ThemeSwitcher() {
   ];
 
   return (
-    <div className="flex gap-0.5 rounded-xl border border-border/60 bg-muted/50 p-1 dark:border-white/[0.08] dark:bg-white/[0.04]">
+    <div className="flex gap-0.5 rounded-xl border border-border bg-background/60 p-1 dark:bg-white/[0.03]">
       {themes.map(({ value, label, icon: Icon }) => (
         <button
           key={value}
           type="button"
           onClick={() => setTheme(value)}
           title={label}
-          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-all duration-200 ${
+          aria-label={label}
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${
             theme === value
-              ? "bg-primary text-primary-foreground shadow-sm shadow-emerald-500/20"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              ? "bg-card text-foreground shadow-sm ring-1 ring-border"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <Icon className="h-4 w-4" />
