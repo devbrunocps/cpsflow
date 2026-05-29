@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Bot,
   Workflow,
@@ -7,6 +9,8 @@ import {
   BarChart3,
   Sparkles,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import type { MouseEvent } from "react";
 
 const features = [
   {
@@ -44,6 +48,15 @@ const features = [
   },
 ];
 
+const ease = [0.16, 1, 0.3, 1] as const;
+
+function handleSpotlight(e: MouseEvent<HTMLDivElement>) {
+  const el = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${e.clientX - rect.left}px`);
+  el.style.setProperty("--my", `${e.clientY - rect.top}px`);
+}
+
 export function Features() {
   return (
     <section id="recursos" className="relative py-24 sm:py-32">
@@ -57,16 +70,21 @@ export function Features() {
             Uma operação de atendimento completa, no piloto automático
           </h2>
           <p className="mt-4 text-pretty text-base leading-relaxed text-slate-400">
-            Do primeiro "olá" ao fechamento da venda, o CPSFLOW cuida de cada
+            Do primeiro &quot;olá&quot; ao fechamento da venda, o CPSFLOW cuida de cada
             etapa com inteligência e elegância.
           </p>
         </div>
 
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <div
+          {features.map((f, i) => (
+            <motion.div
               key={f.title}
-              className={`group relative overflow-hidden rounded-2xl border border-white/10 p-6 transition-all duration-300 hover:border-emerald-500/30 ${
+              onMouseMove={handleSpotlight}
+              initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6, delay: (i % 3) * 0.08, ease }}
+              className={`spotlight group relative overflow-hidden rounded-2xl border border-white/10 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/30 ${
                 f.highlight
                   ? "bg-gradient-to-br from-emerald-500/10 via-slate-900/40 to-transparent"
                   : "bg-white/[0.03] hover:bg-white/[0.05]"
@@ -77,7 +95,7 @@ export function Features() {
               </div>
               <h3 className="mt-5 text-lg font-bold text-white">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-400">{f.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
