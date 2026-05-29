@@ -1,6 +1,12 @@
+"use client";
+
 import { Check, MessageCircle, GitBranch, Send, Bot, Zap } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 function FlowMock() {
+  const reduce = useReducedMotion();
   const nodes = [
     { icon: MessageCircle, label: "Nova mensagem", tone: "sky" },
     { icon: Bot, label: "IA qualifica o lead", tone: "emerald" },
@@ -21,15 +27,36 @@ function FlowMock() {
       <div className="relative flex flex-col gap-3">
         {nodes.map((n, i) => (
           <div key={n.label} className="flex flex-col items-center">
-            <div
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.15, ease }}
               className={`flex w-full items-center gap-3 rounded-xl border border-white/10 bg-gradient-to-r to-transparent p-3 ${tones[n.tone]}`}
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 ring-1">
                 <n.icon className="h-4 w-4" aria-hidden="true" />
               </span>
               <span className="text-sm font-semibold text-white">{n.label}</span>
-            </div>
-            {i < nodes.length - 1 && <span className="h-5 w-px bg-gradient-to-b from-emerald-400/60 to-transparent" />}
+            </motion.div>
+
+            {i < nodes.length - 1 && (
+              <span className="relative h-5 w-px overflow-hidden bg-white/10">
+                {!reduce && (
+                  <motion.span
+                    className="absolute left-0 top-0 h-2 w-px bg-emerald-400"
+                    initial={{ y: -8 }}
+                    animate={{ y: 20 }}
+                    transition={{
+                      duration: 1.1,
+                      repeat: Infinity,
+                      ease: "easeIn",
+                      delay: i * 0.35,
+                    }}
+                  />
+                )}
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -37,7 +64,15 @@ function FlowMock() {
   );
 }
 
+const chatBubbles = [
+  { side: "in", text: "Olá! Vocês têm horário disponível essa semana?" },
+  { side: "out", text: "Oi, Marina! Temos quinta às 15h ou sexta às 10h. Qual prefere?" },
+  { side: "in", text: "Quinta às 15h, por favor." },
+  { side: "out", text: "Agendado! Enviei a confirmação. Até quinta", check: true },
+] as const;
+
 function ChatMock() {
+  const reduce = useReducedMotion();
   return (
     <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
       <div className="flex items-center gap-3 border-b border-white/10 pb-3">
@@ -50,23 +85,46 @@ function ChatMock() {
         </div>
       </div>
       <div className="space-y-3 py-4">
-        <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white/5 px-3.5 py-2.5 text-sm text-slate-200">
-          Olá! Vocês têm horário disponível essa semana?
-        </div>
-        <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-gradient-to-br from-emerald-500 to-teal-500 px-3.5 py-2.5 text-sm font-medium text-white">
-          Oi, Marina! Temos quinta às 15h ou sexta às 10h. Qual prefere?
-        </div>
-        <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white/5 px-3.5 py-2.5 text-sm text-slate-200">
-          Quinta às 15h, por favor.
-        </div>
-        <div className="ml-auto flex max-w-[80%] items-center gap-2 rounded-2xl rounded-tr-sm bg-gradient-to-br from-emerald-500 to-teal-500 px-3.5 py-2.5 text-sm font-medium text-white">
-          <Check className="h-4 w-4" aria-hidden="true" />
-          Agendado! Enviei a confirmação. Até quinta 💚
-        </div>
+        {chatBubbles.map((b, i) =>
+          b.side === "in" ? (
+            <motion.div
+              key={i}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.4, ease }}
+              className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white/5 px-3.5 py-2.5 text-sm text-slate-200"
+            >
+              {b.text}
+            </motion.div>
+          ) : (
+            <motion.div
+              key={i}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.4, ease }}
+              className="ml-auto flex max-w-[80%] items-center gap-2 rounded-2xl rounded-tr-sm bg-gradient-to-br from-emerald-500 to-teal-500 px-3.5 py-2.5 text-sm font-medium text-white"
+            >
+              {b.check && <Check className="h-4 w-4" aria-hidden="true" />}
+              {b.text}
+            </motion.div>
+          ),
+        )}
       </div>
       <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
         <Bot className="h-4 w-4 text-emerald-400" aria-hidden="true" />
         <span className="text-xs text-slate-400">IA respondendo automaticamente…</span>
+        <span className="ml-1 flex gap-1">
+          {[0, 1, 2].map((d) => (
+            <motion.span
+              key={d}
+              className="h-1 w-1 rounded-full bg-emerald-400"
+              animate={reduce ? undefined : { opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
+            />
+          ))}
+        </span>
       </div>
     </div>
   );
