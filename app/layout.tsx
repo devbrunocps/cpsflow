@@ -10,8 +10,29 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Atendente Inteligente para WhatsApp",
-  description: "Painel SaaS para atendimento automatico no WhatsApp",
+  title: "CPSFLOW — Atendimento e vendas com IA no WhatsApp",
+  description:
+    "A plataforma que une IA, automação e CRM para responder, qualificar leads e fechar vendas no WhatsApp 24 horas por dia.",
+  keywords: [
+    "WhatsApp",
+    "IA",
+    "automação",
+    "CRM",
+    "atendimento",
+    "vendas",
+    "chatbot",
+    "CPSFLOW",
+  ],
+  openGraph: {
+    title: "CPSFLOW — Atendimento e vendas com IA no WhatsApp",
+    description:
+      "Transforme conversas do WhatsApp em vendas no automático com IA, flow builder visual e CRM.",
+    type: "website",
+  },
+};
+
+export const viewport = {
+  themeColor: "#020617",
 };
 
 export default function RootLayout({
