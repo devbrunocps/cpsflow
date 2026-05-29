@@ -56,7 +56,7 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
   const pathname = usePathname();
 
   return (
-    <aside className="hidden h-screen w-[264px] shrink-0 flex-col border-r border-border bg-card/60 backdrop-blur-2xl lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex dark:bg-[hsl(222_24%_5%/0.85)]">
+    <aside className="hidden h-screen w-[264px] shrink-0 flex-col border-r border-border bg-card lg:fixed lg:left-0 lg:top-0 lg:z-40 lg:flex dark:bg-[hsl(222_24%_5%/0.85)] dark:backdrop-blur-2xl">
       {/* Brand */}
       <div className="flex h-[68px] items-center gap-3 border-b border-border px-5">
         {logoUrl ? (
@@ -79,7 +79,7 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
         {navGroups.map((group) => (
           <div key={group.label}>
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               {group.label}
             </p>
             <div className="flex flex-col gap-0.5">
@@ -117,7 +117,7 @@ export function Sidebar({ companyName, companyInitials, logoUrl, isSuperAdmin }:
 
         {isSuperAdmin && (
           <div>
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               Administração
             </p>
             <Link

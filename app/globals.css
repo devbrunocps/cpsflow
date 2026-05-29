@@ -15,34 +15,34 @@
   --popover-foreground: 222 24% 12%;
 
   /* Muted */
-  --muted: 210 24% 96%;
-  --muted-foreground: 216 14% 47%;
+  --muted: 214 28% 95%;
+  --muted-foreground: 217 16% 40%;
 
   /* Primary (emerald) */
-  --primary: 160 84% 36%;
+  --primary: 160 84% 33%;
   --primary-foreground: 0 0% 100%;
 
   /* Secondary */
-  --secondary: 210 24% 96%;
+  --secondary: 214 28% 95%;
   --secondary-foreground: 222 24% 14%;
 
   /* Accent */
-  --accent: 210 24% 94%;
+  --accent: 214 28% 92%;
   --accent-foreground: 222 24% 14%;
 
   /* Destructive */
-  --destructive: 0 80% 58%;
+  --destructive: 0 80% 56%;
   --destructive-foreground: 0 0% 100%;
 
   /* Border / Ring */
-  --border: 216 18% 90%;
-  --ring: 160 84% 40%;
-  --input: 216 18% 90%;
+  --border: 216 20% 84%;
+  --ring: 160 84% 36%;
+  --input: 216 20% 84%;
 
   /* Surfaces (translucent layers) */
   --surface: 0 0% 100%;
-  --surface-2: 210 24% 97%;
-  --hairline: 216 18% 90%;
+  --surface-2: 214 28% 96%;
+  --hairline: 216 20% 86%;
 
   --radius: 0.75rem;
 
@@ -169,8 +169,8 @@ html.dark {
 
 html {
   background:
-    radial-gradient(900px circle at 12% -5%, hsl(160 84% 40% / 0.05), transparent 45%),
-    radial-gradient(900px circle at 95% 0%, hsl(199 89% 48% / 0.04), transparent 40%),
+    radial-gradient(800px circle at 8% -8%, hsl(160 84% 40% / 0.035), transparent 42%),
+    radial-gradient(800px circle at 98% -2%, hsl(199 89% 48% / 0.028), transparent 38%),
     hsl(var(--background));
   transition: background 0.4s ease, color 0.25s ease;
 }
@@ -373,4 +373,44 @@ body {
   .animate-float {
     animation: none !important;
   }
+}
+
+/* ─────────────────────────────────────────────
+   LANDING PAGE — sempre escura, alinhada ao
+   sistema interno. A landing usa a escala `slate`
+   do Tailwind; aqui remapeamos essas variáveis
+   para os mesmos tons (hue 222, baixa saturação)
+   do tema escuro do app, eliminando o azul.
+   ───────────────────────────────────────────── */
+
+.landing-page {
+  color-scheme: dark;
+  /* Fundos / superfícies — idênticos ao app */
+  --color-slate-950: hsl(222 24% 5%); /* = --background dark */
+  --color-slate-900: hsl(222 20% 9%); /* = --card dark */
+  --color-slate-800: hsl(220 14% 17%); /* = --border/secondary dark */
+  --color-slate-700: hsl(220 13% 24%);
+  /* Texto — neutro frio alinhado ao foreground/muted do app */
+  --color-slate-100: hsl(210 18% 93%);
+  --color-slate-200: hsl(213 16% 86%);
+  --color-slate-300: hsl(214 14% 77%);
+  --color-slate-400: hsl(217 12% 62%);
+  --color-slate-500: hsl(217 11% 52%);
+}
+
+/* ─────────────────────────────────────────────
+   TEMA LIGHT — correções de visibilidade
+   Superfícies/bordas baseadas em `white/NN` foram
+   pensadas para o dark (branco translúcido sobre
+   fundo escuro). No light elas somem (branco sobre
+   branco). Aqui as convertemos em tons sutis
+   escuros para manter a hierarquia visível.
+   (A landing é excluída pois é sempre escura.)
+   ───────────────────────────────────────────── */
+
+html:not(.dark) [class*="bg-white/"]:not(.landing-page, .landing-page *) {
+  background-color: hsl(216 24% 16% / 0.045);
+}
+html:not(.dark) [class*="border-white/"]:not(.landing-page, .landing-page *) {
+  border-color: hsl(216 20% 84%);
 }

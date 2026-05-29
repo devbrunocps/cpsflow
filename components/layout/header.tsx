@@ -38,7 +38,7 @@ export function Header() {
   const title = titles[pathname] ?? "CPSFLOW";
 
   return (
-    <header className="sticky top-0 z-30 flex h-[68px] items-center gap-3 border-b border-border bg-background/70 px-4 backdrop-blur-2xl sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-[68px] items-center gap-3 border-b border-border bg-card/90 px-4 backdrop-blur-2xl sm:px-6 lg:px-8 dark:bg-background/70">
       {/* Mobile menu trigger */}
       <div className="lg:hidden">
         <Button variant="outline" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu">
